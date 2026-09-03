@@ -4,6 +4,12 @@
 
 A comprehensive fullstack web application built with Node.js/Express backend and React/Vite frontend for managing adventure bookings, hotel reservations, and item rentals with advanced features like automated payouts, real-time chat, and multi-language support.
 
+## 🌐 Live Demo
+
+The application is deployed and publicly accessible at:
+
+**https://booking-platform-9tlk.onrender.com**
+
 ## 🏗️ High-Level Architecture
 
 ### System Overview
