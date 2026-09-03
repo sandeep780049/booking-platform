@@ -51,6 +51,10 @@ import { errorHandlingMiddleware } from "./middlewares/error.middleware.js";
 const app = express();
 // Create HTTP server using Express app
 const server = createServer(app);
+// Render recommends raising these for Node web services behind its proxy
+// to avoid intermittent 502s / "Connection reset by peer" errors.
+server.keepAliveTimeout = 120000; // 120s
+server.headersTimeout = 120000; // 120s (must be >= keepAliveTimeout)
 // Initialize Socket.IO with the HTTP server
 const io = new Server(server, {
   cors: {
