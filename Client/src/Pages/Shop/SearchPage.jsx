@@ -24,7 +24,7 @@ export default function SearchPage() {
   const [categories, setCategories] = useState([]);
   const searchQuery = searchParams.get('search') || '';
   const categoryParam = searchParams.get('category') || '';
-  const baseUrl = import.meta.env.VITE_SERVER_URL;
+  const baseUrl = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '/' : 'http://localhost:8080/');
 
   const limit = 12;
 

@@ -46,7 +46,7 @@ export default function ProductsGrid({ items = [], categories = [], selectedCate
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const debounceRef = useRef(null);
-    const baseUrl = import.meta.env.VITE_SERVER_URL;
+    const baseUrl = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '/' : 'http://localhost:8080/');
 
     useEffect(() => { setLocalCategory(selectedCategory || ''); setAppliedCategory(selectedCategory || ''); }, [selectedCategory]);
     useEffect(() => { setLocalSearch(search || ''); setAppliedSearch(search || ''); }, [search]);

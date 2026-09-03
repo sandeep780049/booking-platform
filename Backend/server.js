@@ -40,6 +40,11 @@ import { ensureDefaultDeclaration } from "./controllers/declaration.controller.j
 import initSocketIO from "./socket/socket.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { initPayoutCronJob } from "./controllers/transaction.controller.js";
 import { errorHandlingMiddleware } from "./middlewares/error.middleware.js";
 
@@ -92,6 +97,23 @@ app.use("/api/sponsors", sponsorRouter);
 app.use("/api/achievement-rules", achievementRuleRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/registration-limits", registrationLimitRouter);
+
+// Serve the built React client (single-URL production deployment)
+const clientDist = fs.existsSync(path.join(__dirname, "../Client/dist"))
+  ? path.join(__dirname, "../Client/dist")
+  : path.join(process.cwd(), "Client/dist");
+
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get("*", (req, res, next) => {
+    // Let API and Socket.IO requests pass through
+    if (req.path.startsWith("/api") || req.path.startsWith("/socket.io")) return next();
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+} else {
+  console.log("Client build not found, serving API only");
+}
+
 app.use(errorHandlingMiddleware); // middlware for handling error
 
 const PORT = process.env.PORT || 8080;

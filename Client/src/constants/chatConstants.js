@@ -1,5 +1,5 @@
 // Socket configuration
-export const SOCKET_URL = 'http://localhost:8080';
+export const SOCKET_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:8080');
 export const SOCKET_CONFIG = {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,

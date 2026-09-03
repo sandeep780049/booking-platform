@@ -20,7 +20,7 @@ export default function AdventureShop() {
   const { addToCart } = useContext(CartContext);
   const location = useLocation();
 
-  const baseUrl = import.meta.env.VITE_SERVER_URL;
+  const baseUrl = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '/' : 'http://localhost:8080/');
   const productsRef = useRef(null);
   const navigate = useNavigate();
 
