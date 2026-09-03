@@ -9,7 +9,9 @@ const redis = createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
     host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 15198
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 15198,
+    // Some managed providers (e.g. Redis Cloud free tier) require TLS
+    ...(process.env.REDIS_TLS === 'true' ? { tls: true } : {})
   }
 });
 
