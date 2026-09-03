@@ -1,0 +1,92 @@
+[
+    {
+        "id": 1,
+        "name": "John Doe",
+        "ratings": 4.5,
+        "experience": "5 years",
+        "charges": 50,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Skydiving"
+    },
+    {
+        "id": 2,
+        "name": "Jane Smith",
+        "ratings": 4.7,
+        "experience": "7 years",
+        "charges": 60,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Skydiving"
+    },
+    {
+        "id": 3,
+        "name": "Emily Johnson",
+        "ratings": 4.8,
+        "experience": "6 years",
+        "charges": 55,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Rock Climbing"
+    },
+    {
+        "id": 4,
+        "name": "Michael Brown",
+        "ratings": 4.6,
+        "experience": "8 years",
+        "charges": 65,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Skiing"
+    },
+    {
+        "id": 5,
+        "name": "Jessica Davis",
+        "ratings": 4.9,
+        "experience": "9 years",
+        "charges": 70,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Scuba Diving"
+    },
+    {
+        "id": 6,
+        "name": "David Wilson",
+        "ratings": 4.4,
+        "experience": "4 years",
+        "charges": 45,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Surfing"
+    },
+    {
+        "id": 7,
+        "name": "Sarah Martinez",
+        "ratings": 4.7,
+        "experience": "7 years",
+        "charges": 60,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Paragliding"
+    },
+    {
+        "id": 8,
+        "name": "James Anderson",
+        "ratings": 4.5,
+        "experience": "5 years",
+        "charges": 50,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Bungee Jumping"
+    },
+    {
+        "id": 9,
+        "name": "Laura Thomas",
+        "ratings": 4.8,
+        "experience": "6 years",
+        "charges": 55,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Mountain Climbing"
+    },
+    {
+        "id": 10,
+        "name": "Robert Jackson",
+        "ratings": 4.6,
+        "experience": "8 years",
+        "charges": 65,
+        "profile_photo": "https://res.cloudinary.com/dygmsxtsd/image/upload/v1740718779/face_i45pxi.jpg",
+        "adventure": "Skydiving"
+    }
+]

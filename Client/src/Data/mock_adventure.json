@@ -1,0 +1,111 @@
+[
+  {
+    "id": 1,
+    "name": "Skydiving",
+    "description": "Experience the thrill of free-falling from 15,000 feet with a certified instructor.",
+    "location": "Dubai",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 250,
+    "exp": 45,
+    "date": "2025-02-26"
+  },
+  {
+    "id": 11,
+    "name": "Scuba Diving",
+    "description": "Experience the thrill of free-falling from 15,000 feet with a certified instructor.",
+    "location": "Dubai",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 180,
+    "exp": 40,
+    "date": "2025-02-28"
+  },
+  {
+    "id": 2,
+    "name": "Scuba Diving",
+    "description": "Explore vibrant coral reefs and marine life in crystal-clear waters.",
+    "location": "Sydney",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 220,
+    "exp": 55,
+    "date": "2025-02-27"
+  },
+  {
+    "id": 3,
+    "name": "Mountain Biking",
+    "description": "Ride through rugged trails and scenic mountain landscapes.",
+    "location": "Vancouver",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 150,
+    "exp": 35,
+    "date": "2025-03-01"
+  },
+  {
+    "id": 4,
+    "name": "Bungee Jumping",
+    "description": "Leap off a towering bridge with nothing but a bungee cord attached.",
+    "location": "Auckland",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 300,
+    "exp": 60,
+    "date": "2025-02-29"
+  },
+  {
+    "id": 5,
+    "name": "White Water Rafting",
+    "description": "Navigate through challenging rapids and enjoy the adrenaline rush.",
+    "location": "Harare",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 170,
+    "exp": 48,
+    "date": "2025-03-02"
+  },
+  {
+    "id": 6,
+    "name": "Hot Air Balloon Ride",
+    "description": "Float above breathtaking landscapes and watch the sunrise.",
+    "location": "Istanbul",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 260,
+    "exp": 52,
+    "date": "2025-02-26"
+  },
+  {
+    "id": 7,
+    "name": "Rock Climbing",
+    "description": "Scale challenging rock faces with professional guidance.",
+    "location": "San Francisco",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 190,
+    "exp": 42,
+    "date": "2025-03-01"
+  },
+  {
+    "id": 8,
+    "name": "Paragliding",
+    "description": "Soar like a bird and enjoy panoramic views from the sky.",
+    "location": "Zurich",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 230,
+    "exp": 50,
+    "date": "2025-02-28"
+  },
+  {
+    "id": 9,
+    "name": "Sandboarding",
+    "description": "Slide down massive sand dunes at exhilarating speeds.",
+    "location": "Windhoek",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "price": 140,
+    "exp": 38,
+    "date": "2025-03-02"
+  },
+  {
+    "id": 10,
+    "name": "Zip Lining",
+    "description": "Fly through treetops on one of the world’s longest zip lines.",
+    "location": "San José",
+    "img": "https://static.toiimg.com/photo/80653694.cms",
+    "exp": 46,
+    "date": "2025-02-27"
+  }
+]

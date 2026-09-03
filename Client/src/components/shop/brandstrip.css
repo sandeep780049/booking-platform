@@ -1,0 +1,25 @@
+.brand-marquee { 
+  width: 100%;
+  overflow: hidden;
+}
+.brand-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 4rem;
+  animation: brand-scroll 28s linear infinite;
+}
+.brand-marquee:hover .brand-track {
+  animation-play-state: paused;
+}
+.brand-item { flex: 0 0 auto; }
+
+@keyframes brand-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .brand-track { gap: 2.5rem; animation-duration: 22s; }
+}
