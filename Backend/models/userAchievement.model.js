@@ -110,7 +110,8 @@ const userAchievementSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-userAchievementSchema.index({ userId: 1 });
+// Note: userId already gets an index from `unique: true` above,
+// so declaring it again here would create a duplicate index.
 userAchievementSchema.index({ level: -1 });
 userAchievementSchema.index({ totalExperiencePoints: -1 });
 
