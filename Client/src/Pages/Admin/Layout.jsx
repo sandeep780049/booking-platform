@@ -69,7 +69,7 @@ const SIDEBAR_ITEMS = [
   { key: 'Bookings', path: '/admin/bookings', icon: BookOpen, label: 'Bookings' },
   { key: 'Events', path: '/admin/events', icon: Hotel, label: 'Events' },
   { key: 'Achievement Rules', path: '/admin/achievement-rules', icon: Award, label: 'Achievement Rules' },
-  { key: 'Admins', path: '/admin/manager', icon: User, label: 'Admins' },
+  { key: 'Admins', path: '/admin/rbac', icon: User, label: 'Admins' },
   { key: 'Hotels', path: '/admin/hotels', icon: Hotel, label: 'Accomodation' },
   { key: 'Instructor', path: '/admin/instructors', icon: User, label: 'Instructor' },
   { key: 'Locations', path: '/admin/locations', icon: Compass, label: 'Locations' },

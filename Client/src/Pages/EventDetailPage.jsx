@@ -310,7 +310,7 @@ export default function EventDetailPage() {
             if (isFreeEvent) {
                 // Free event - no payment needed
                 toast.success("Booking confirmed! Check your bookings.");
-                navigate("/my-bookings");
+                navigate("/dashboard/bookings");
             } else if (response?.data?.paymentMethod === "paypal") {
                 // For PayPal, redirect to PayPal approval URL
                 const paymentOrder = response?.data?.paymentOrder;
@@ -353,7 +353,7 @@ export default function EventDetailPage() {
                 // No payment method detected, assume booking confirmed
                 console.warn("⚠️ Unexpected state - paymentMethod:", response?.data?.paymentMethod);
                 toast.success("Booking created! Check your bookings.");
-                navigate("/my-bookings");
+                navigate("/dashboard/bookings");
             }
         } catch (err) {
             toast.dismiss();

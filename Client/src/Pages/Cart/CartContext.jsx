@@ -6,6 +6,10 @@ export const CartContext = createContext()
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth()
+  // The auth context exposes the whole redux slice ({ user, loading }); the
+  // actual logged-in user object lives at user.user. Use it everywhere the
+  // provider decides between server-backed and guest (localStorage) carts.
+  const currentUser = user?.user
   // local cart for unauthenticated users (store shape: { items: [] })
   const [localCart, setLocalCart] = useState({ items: [] })
 
@@ -36,7 +40,7 @@ export const CartProvider = ({ children }) => {
   // Unified addToCart: accepts either a full product object (from listings) or a server payload
   const addToCart = async (productOrPayload) => {
     // If user is authenticated, forward to server hook
-    if (user) {
+    if (currentUser) {
       // If payload already contains `item` (server format), pass it through
       if (productOrPayload && productOrPayload.item) {
         return serverCart.addToCart(productOrPayload)
@@ -77,7 +81,7 @@ export const CartProvider = ({ children }) => {
   }
 
   const removeFromCart = async (productId, purchase = false) => {
-    if (user) {
+    if (currentUser) {
       return serverCart.removeCartItem({ itemId: productId, purchase })
     }
     setLocalCart((prev) => ({ items: prev.items.filter((i) => i._id !== productId) }))
@@ -85,19 +89,19 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (productId, newQuantity, purchase = false) => {
     if (newQuantity < 1) return
-    if (user) {
+    if (currentUser) {
       return serverCart.updateCartItem({ itemId: productId, quantity: newQuantity, purchase })
     }
     setLocalCart((prev) => ({ items: prev.items.map((i) => (i._id === productId ? { ...i, quantity: newQuantity } : i)) }))
   }
 
   const clearCart = async () => {
-    if (user) return serverCart.clearCart()
+    if (currentUser) return serverCart.clearCart()
     setLocalCart({ items: [] })
   }
 
   const getCartTotal = () => {
-    const activeCart = user ? serverCart.cart?.items || [] : localCart.items || []
+    const activeCart = currentUser ? serverCart.cart?.items || [] : localCart.items || []
     return activeCart.reduce((total, entry) => {
       const price = entry.item ? (entry.purchase ? entry.item.price : entry.item.rentalPrice) : entry.price || 0
       const days = entry.rentalPeriod ? entry.rentalPeriod.days || 1 : 1
@@ -112,14 +116,14 @@ export const CartProvider = ({ children }) => {
   }
 
   const getCartItemsCount = () => {
-    const activeCart = user ? serverCart.cart?.items || [] : localCart.items || []
+    const activeCart = currentUser ? serverCart.cart?.items || [] : localCart.items || []
     return activeCart.reduce((count, item) => count + (item.quantity || 0), 0)
   }
   return (
     <CartContext.Provider
       value={{
         // expose unified cart in shape { items: [] }
-        cart: user ? serverCart.cart || { items: [] } : localCart,
+        cart: currentUser ? serverCart.cart || { items: [] } : localCart,
         addToCart,
         removeFromCart,
         updateQuantity,
@@ -127,7 +131,7 @@ export const CartProvider = ({ children }) => {
         getCartTotal,
         getCartItemsCount,
         // expose server hooks for advanced usage
-        serverCart: user ? serverCart : null,
+        serverCart: currentUser ? serverCart : null,
       }}
     >
       {children}

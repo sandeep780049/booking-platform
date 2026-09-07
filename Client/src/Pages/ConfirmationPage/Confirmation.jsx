@@ -179,7 +179,7 @@ export default function Confirmation() {
             >
               Back to Home
             </Button>
-            <Button onClick={() => navigate("/my-bookings")} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button onClick={() => navigate("/dashboard/bookings")} className="bg-blue-600 hover:bg-blue-700 text-white">
               View My Bookings
             </Button>
           </div>

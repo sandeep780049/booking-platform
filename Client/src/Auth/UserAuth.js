@@ -24,6 +24,10 @@ export const VerifyUser = async (data, dispatch) => {
       withCredentials: true,
     });
     if (res.status === 200 && dispatch) {
+      const accessToken = res.data?.data?.accessToken;
+      const refreshToken = res.data?.data?.user?.refreshToken;
+      if (accessToken) localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       dispatch(loginSuccess(res.data.data));
     }
     return { success: true, status: res.status, data: res.data };
@@ -38,6 +42,12 @@ export const UserLogin = async (data, dispatch) => {
       withCredentials: true,
     });
     if (res.data.statusCode === 200 || res.status === 200) {
+      // Persist the actual access token (not the refresh token) so the axios
+      // interceptor sends the correct credential in the Authorization header.
+      const accessToken = res.data?.data?.accessToken;
+      const refreshToken = res.data?.data?.user?.refreshToken;
+      if (accessToken) localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       dispatch(loginSuccess(res.data.data.user));
       return { success: true, status: res.status, data: res.data };
     }
@@ -139,6 +149,8 @@ export const GoogleLoginSuccess = async (response, dispatch) => {
       { withCredentials: true }
     );
     if (res.data) {
+      const accessToken = res.data?.data?.accessToken;
+      if (accessToken) localStorage.setItem('accessToken', accessToken);
       dispatch(loginSuccess(res.data.data));
       return { success: true, status: res.status, data: res.data };
     }

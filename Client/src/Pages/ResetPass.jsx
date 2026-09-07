@@ -21,16 +21,21 @@ export const ResetPass = () => {
     try {
       const data = { email: email, otp: value };
       const res = await VerifyUser(data);
-      if (res === 200) {
+      // VerifyUser returns an object, not a raw status code
+      if (res && res.status === 200) {
         toast('OTP Verified');
         setModel(false);
         setPassModel(true);
+      } else {
+        throw new Error('Invalid OTP');
       }
     } catch (err) {
-      if (err.response) {
-        if (err.response.status === 400) {
-          toast('Invalid OTP');
-        }
+      if (err.response && err.response.status === 400) {
+        toast('Invalid OTP');
+      } else if (err?.response?.status === 410) {
+        toast('OTP has expired. Please request a new one.');
+      } else if (!err?.response) {
+        toast('Invalid OTP');
       }
     }
   };

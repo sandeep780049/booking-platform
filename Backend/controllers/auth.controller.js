@@ -99,7 +99,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     new ApiResponse(
       200,
       {
-        user: user,
+        user: createdUser,
       },
       "User registered Succesfully",
     ),
@@ -206,7 +206,15 @@ const registerInstructor = asyncHandler(async (req, res) => {
       200,
       {
         instructor: instructor,
-        user: req.user,
+        user: {
+          _id: req.user._id,
+          email: req.user.email,
+          name: req.user.name,
+          phoneNumber: req.user.phoneNumber,
+          verified: req.user.verified,
+          role: req.user.role,
+          instructor: req.user.instructor,
+        },
         registrationStatus: registrationStatus,
       },
       message,
@@ -425,10 +433,21 @@ const updatePassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Email and New Password are Required");
   }
 
-  const user = await User.findOne({ email: email }).select("password email");
+  // Security: the caller must be the account owner. The forgot-password flow
+  // authenticates the user via OTP (which issues an access/refresh token), so
+  // we only allow updating the password for the authenticated user and verify
+  // the submitted email matches their account.
+  const user = await User.findById(req.user?._id).select("email password");
 
   if (!user) {
     throw new ApiError(404, "User not found");
+  }
+
+  if (!req.user?._id || user.email.toLowerCase() !== email.toLowerCase()) {
+    throw new ApiError(
+      403,
+      "You can only update the password for your own account",
+    );
   }
 
   user.password = newpassword;
@@ -439,7 +458,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       {
-        user,
+        user: { email: user.email },
       },
       "Password Updated Successfully",
     ),
@@ -451,7 +470,7 @@ const verifyNewEmail = asyncHandler(async (req, res) => {
   if (!newEmail || newEmail.trim() === "") {
     throw new ApiError(400, "New Email is Required");
   }
-  const user = User.findById(req.user._id);
+  const user = await User.findById(req.user._id);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -618,7 +637,7 @@ const signInWithLinkedin = asyncHandler(async (req, res) => {
       email: userDetails.email,
       name: userDetails.name,
       verified: true,
-    }).select("email phoneNumber name verified role");
+    });
 
     await user.save();
   }

@@ -39,7 +39,7 @@ router.patch("/:bookingId/adventure/:adventureId/complete", completeAdventure); 
 router.get("/events/:eventId/adventures", getEventAdventures); // Get adventures for specific event
 
 // Admin routes
-router.get("/", verifyInstructor, getAllEventBookings); // Admin: Get all event bookings
+router.get("/", verifyAdmin, getAllEventBookings); // Admin: Get all event bookings
 router.get("/adventures/all", verifyAdmin, getAllAdventuresForSelection); // Admin: Get all adventures for selection
 router.patch("/:bookingId/award-nft", verifyAdmin, awardNft); // Admin: Award NFT manually
 router.delete("/:id", verifyAdmin, deleteEventBooking); // Admin: Delete event booking

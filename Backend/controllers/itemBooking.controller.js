@@ -509,7 +509,7 @@ export const approveBooking = asyncHandler(async (req, res) => {
     // Only capture if order is not already completed
     const captureResponse = await payPalService.captureOrder(orderId);
 
-    if (!captureResponse) {
+    if (captureResponse) {
       // Update booking status
       booking.paymentStatus = "completed";
       booking.paymentCompletedAt = new Date();

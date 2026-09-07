@@ -19,14 +19,17 @@ const LinkedInCallback = () => {
       axiosClient
         .post("/api/auth/signInWithLinkedin", { code })
         .then((res) => {
-          setTimeout(() => {
-            dispatch(loginSuccess(res.data.data));
-          }, 40000);
-          navigate("/");
+          const token = res?.data?.data?.accessToken;
+          if (token) {
+            localStorage.setItem("accessToken", token);
+          }
+          dispatch(loginSuccess(res.data.data));
+          navigate("/", { replace: true });
         })
         .catch((err) => {
           console.error("Login Failed:", err);
           requestSent.current = false; // Reset if there was an error
+          navigate("/login", { replace: true });
         });
     }
   }, [navigate]); // Include navigate in the dependency array

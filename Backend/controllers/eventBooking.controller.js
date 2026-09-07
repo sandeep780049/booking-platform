@@ -606,6 +606,13 @@ export const completeAdventure = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Booking not found");
   }
 
+  // Security: only the booking owner (or an admin) may complete an adventure
+  const isOwner = booking.user?._id?.toString?.() === req.user._id.toString();
+  const isAdmin = req.user.role === "admin" || req.user.role === "superadmin";
+  if (!isOwner && !isAdmin) {
+    throw new ApiError(403, "You can only complete adventures on your own bookings");
+  }
+
   // Check if the adventure is part of this booking
   const adventureStatus = booking.adventureCompletionStatus.find(
     (status) => status.adventure._id.toString() === adventureId

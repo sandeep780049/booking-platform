@@ -209,29 +209,22 @@ const getConfirmedBookings = async () => {
     });
   });
 
-  // Add hotel bookings
-  hotelBookings.forEach((booking) => {
-    if (booking.hotel?.owner) {
-      bookings.push({
-        ...booking,
-        type: "hotel",
-        providerId: booking.hotel.owner._id,
-        providerInfo: booking.hotel.owner,
-      });
-    }
-  });
-
   // Note: Item bookings are skipped since items don't have owners in this system
   // This can be added later if the Item model is updated to include an owner field
 
-  // Filter out bookings that already have payouts processed
+  // Filter out bookings that already have payouts processed.
+  // Payout records scope multiple bookings with a comma-joined itemId (see
+  // processProviderPayout), so a booking is considered "already paid" when its
+  // id appears inside any processed payout's itemId list.
   const processedPayouts = await Payout.find({
     status: { $in: ["QUEUED", "SENT", "SUCCESS"] },
   }).distinct("itemId");
 
   return bookings.filter((booking) => {
     const bookingId = booking._id.toString();
-    return !processedPayouts.includes(bookingId);
+    return !processedPayouts.some((itemId) =>
+      String(itemId).split(",").includes(bookingId)
+    );
   });
 };
 

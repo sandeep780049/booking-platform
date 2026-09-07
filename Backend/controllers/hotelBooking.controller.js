@@ -46,9 +46,54 @@ export const createHotelBooking = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Hotel not found");
   }
 
+  // Feature: prevent overbooking
+  // 1. Validate check-in is not in the past
+  const parsedCheckIn = new Date(checkInDate);
+  const parsedCheckOut = new Date(checkOutDate);
+  parsedCheckIn.setHours(0, 0, 0, 0);
+  if (parsedCheckIn < new Date(new Date().setHours(0, 0, 0, 0))) {
+    throw new ApiError(400, "Check-in date cannot be in the past");
+  }
+
+  // 2. Validate the requested rooms against the hotel's room inventory
+  const availableRooms = hotelData.noRoom || 0;
+  if (availableRooms < 1) {
+    throw new ApiError(400, "This hotel has no rooms available");
+  }
+  if (numberOfRooms > availableRooms) {
+    throw new ApiError(
+      400,
+      `This hotel only has ${availableRooms} room(s) available. You requested ${numberOfRooms}.`
+    );
+  }
+
+  // 3. Validate requested rooms against active bookings that overlap the stay.
+  // A room is occupied for nights [checkIn, checkOut). A conflicting booking is
+  // one whose check-in is before our check-out AND whose check-out is after our
+  // check-in, and that is not cancelled.
+  const overlappingBookings = await HotelBooking.find({
+    hotel,
+    status: { $in: ["pending", "confirmed"] },
+    checkInDate: { $lt: parsedCheckOut },
+    checkOutDate: { $gt: parsedCheckIn },
+  }).select("numberOfRooms");
+
+  const roomsAlreadyBooked = overlappingBookings.reduce(
+    (sum, b) => sum + (b.numberOfRooms || 0),
+    0
+  );
+  const roomsLeftForRequestedDates = availableRooms - roomsAlreadyBooked;
+
+  if (numberOfRooms > roomsLeftForRequestedDates) {
+    throw new ApiError(
+      409,
+      `Only ${roomsLeftForRequestedDates} room(s) are still available for these dates. Please adjust your booking.`
+    );
+  }
+
   // Calculate total price
   const totalPrice = hotelData.pricePerNight * numberOfRooms *
-    Math.ceil((new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24));
+    Math.ceil((parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24));
 
   const booking = await HotelBooking.create({
     user: req.user._id,
@@ -347,7 +392,7 @@ export const getHotelBookingById = asyncHandler(async (req, res) => {
 
   const booking = await HotelBooking.findById(id)
     .populate("user", "name email phoneNumber")
-    .populate("hotels.hotel", "name location pricePerNight rating medias amenities");
+    .populate("hotel", "name location pricePerNight rating medias amenities");
 
   if (!booking) {
     throw new ApiError(404, "Hotel booking not found");
@@ -381,7 +426,7 @@ export const updateHotelBookingStatus = asyncHandler(async (req, res) => {
 
   const updatedBooking = await HotelBooking.findById(id)
     .populate("user", "name email phoneNumber")
-    .populate("hotels.hotel", "name location pricePerNight rating");
+    .populate("hotel", "name location pricePerNight rating");
 
   return res.status(200).json(
     new ApiResponse(200, updatedBooking, "Hotel booking status updated successfully")
@@ -416,7 +461,7 @@ export const cancelHotelBooking = asyncHandler(async (req, res) => {
 
   const updatedBooking = await HotelBooking.findById(id)
     .populate("user", "name email phoneNumber")
-    .populate("hotels.hotel", "name location pricePerNight rating");
+    .populate("hotel", "name location pricePerNight rating");
 
   return res.status(200).json(
     new ApiResponse(200, updatedBooking, "Hotel booking cancelled successfully")

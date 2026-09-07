@@ -353,9 +353,13 @@ export const createSessionBooking = asyncHandler(async (req, res) => {
     );
 
   } catch (error) {
+    // Rollback transaction on error before rethrowing (previously dead code)
+    try {
+      await session_db.abortTransaction();
+    } catch (abortError) {
+      console.error("Error aborting session booking transaction:", abortError);
+    }
     throw error;
-    // Rollback transaction on error
-    await session_db.abortTransaction();
   } finally {
     // End session
     await session_db.endSession();

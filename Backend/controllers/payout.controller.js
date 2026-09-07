@@ -295,13 +295,13 @@ export const getPayPalLinkStatus = asyncHandler(async (req, res) => {
 /* -------------------------- PAYOUT CREATION --------------------------- */
 
 export const createBatchPayout = asyncHandler(async (req, res) => {
-  const { payouts, currency, note } = req.body;
+  const { payouts, currency = "USD", note } = req.body;
 
-  const accessToken = await pp.getAppAccessToken({
-    apiBase: process.env.PAYPAL_API_BASE,
-    clientId: process.env.PAYPAL_CLIENT_ID,
-    secret: process.env.PAYPAL_SECRET,
-  });
+  if (!Array.isArray(payouts) || payouts.length === 0) {
+    throw new ApiError(400, "At least one payout is required");
+  }
+
+  const accessToken = await getAccessToken();
 
   const senderBatchId = uuidv4();
 
@@ -313,7 +313,7 @@ export const createBatchPayout = asyncHandler(async (req, res) => {
       }
       return {
         recipient_type: "EMAIL",
-        amount: { value: p.amount.toFixed(2), currency },
+        amount: { value: Number(p.amount).toFixed(2), currency },
         receiver: user.paypalEmail,
         note: note || "Batch payout from platform",
         sender_item_id: uuidv4(),
@@ -321,18 +321,13 @@ export const createBatchPayout = asyncHandler(async (req, res) => {
     })
   );
 
-  const payoutRes = await pp.createPayout({
-    apiBase: process.env.PAYPAL_API_BASE,
-    accessToken,
-    senderBatchId,
-    items,
-  });
+  const payoutRes = await createPayPalBatchPayout(accessToken, senderBatchId, items);
 
   const savedPayouts = await Promise.all(
     items.map((item, idx) =>
       Payout.create({
         user: payouts[idx].userId,
-        amount: payouts[idx].amount,
+        amount: Number(payouts[idx].amount),
         currency,
         note,
         batchId: senderBatchId,
@@ -349,6 +344,37 @@ export const createBatchPayout = asyncHandler(async (req, res) => {
     payouts: savedPayouts,
   });
 });
+
+const createPayPalBatchPayout = async (accessToken, senderBatchId, items) => {
+  try {
+    const response = await axios.post(
+      `${process.env.PAYPAL_API_BASE}/v1/payments/payouts`,
+      {
+        sender_batch_header: {
+          sender_batch_id: senderBatchId,
+          email_subject: "Payment from Adventure Booking Platform",
+          email_message: "You have received a payment for your services!",
+        },
+        items,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          "PayPal-Partner-Attribution-Id": process.env.PAYPAL_PARTNER_ATTRIBUTION_ID,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating PayPal batch payout:", error.response?.data || error.message);
+    throw new ApiError(
+      500,
+      `Batch payout failed: ${error.response?.data?.message || error.message}`
+    );
+  }
+};
 
 /* -------------------------- PAYOUT QUERIES ---------------------------- */
 

@@ -42,13 +42,13 @@ export const InstructorRegister = () => {
     const handleVerifyOTP = async (otp) => {
         const data = { email: formData.email, otp };
         try {
-            const statusCode = await VerifyUser(data, dispatch);
+            const result = await VerifyUser(data, dispatch);
 
-            if (statusCode === 200) {
+            if (result && result.status === 200) {
                 toast.success("Email verified successfully");
                 setIsOTPModalOpen(false);
                 navigate("/instructor/pending-review");
-            } else if (statusCode === 400) {
+            } else if (result && result.status === 400) {
                 toast.error("Invalid or expired OTP. Please check the code and try again.");
                 throw new Error("Invalid OTP");
             } else {

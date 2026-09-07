@@ -261,7 +261,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user.user !== null && !loading) {
-      localStorage.setItem("accessToken", user.user.refreshToken);
+      // The real access token is stored by the auth helpers when the login
+      // response arrives. Here we only sync the refresh token under its own key.
+      if (user.user.refreshToken) {
+        localStorage.setItem("refreshToken", user.user.refreshToken);
+      }
 
       // Admins always go to /admin — never follow redirectAfterLogin
       if (user.user.role === "admin") {

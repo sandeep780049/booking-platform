@@ -31,10 +31,16 @@ export const createRevolutOrder = async (
     };
 
     // Log the request data for debugging
+    const revolutBaseUrl =
+      process.env.REVOLUT_API_BASE ||
+      (process.env.NODE_ENV === "production"
+        ? "https://merchant.revolut.com/api"
+        : "https://sandbox-merchant.revolut.com/api");
+
     const config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://sandbox-merchant.revolut.com/api/orders",
+      url: `${revolutBaseUrl}/orders`,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",

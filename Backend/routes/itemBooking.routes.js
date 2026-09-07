@@ -11,6 +11,7 @@ import {
     deleteItemBooking,
 } from "../controllers/itemBooking.controller.js";
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { verifyAdmin } from '../middlewares/admin.middleware.js';
 
 const router = express.Router();
 
@@ -35,12 +36,12 @@ router.get('/payment-status/:bookingId', getPaymentStatus);
 
 // Get current user's item bookings
 router.get('/my-bookings', getMyItemBookings);
-router.get('/all-bookings', getAllItemBookings); // Alias for backward compatibility
+router.get('/all-bookings', verifyAdmin, getAllItemBookings); // Alias for backward compatibility
 
 // Get order details
 router.get('/order/:orderId', getOrderDetails);
 
 // Delete item booking (admin only)
-router.delete('/:id', deleteItemBooking);
+router.delete('/:id', verifyAdmin, deleteItemBooking);
 
 export default router;
