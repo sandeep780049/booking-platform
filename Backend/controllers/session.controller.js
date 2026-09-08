@@ -4,6 +4,10 @@ import { Instructor } from "../models/instructor.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
+import {
+  getSessionAvailability,
+  getSessionAvailabilityFields,
+} from "../utils/sessionAvailability.js";
 
 // Create a new session
 export const createPreset = asyncHandler(async (req, res, next) => {
@@ -335,13 +339,18 @@ export const getInstructorSessions = asyncHandler(async (req, res, next) => {
     .select("");
 
   if (!sessions || sessions.length === 0) {
-  }
-
-  if (!sessions || sessions.length === 0) {
     return res.status(404).json({ message: "No sessions found" });
   }
 
-  return res.status(200).json(sessions);
+  // Compute live seat availability from active bookings
+  const seatCounts = await getSessionAvailability(sessions);
+
+  const sessionsWithAvailability = sessions.map((session) => ({
+    ...session.toObject(),
+    ...getSessionAvailabilityFields(session, seatCounts),
+  }));
+
+  return res.status(200).json(sessionsWithAvailability);
 });
 
 // Get instructor's sessions with booking details
@@ -388,6 +397,9 @@ export const getInstructorSessionsWithBookings = asyncHandler(
         },
       });
 
+    // Compute live seat availability from active bookings
+    const seatCounts = await getSessionAvailability(sessions);
+
     // Add computed status and available seats for each session
     const processedSessions = sessions.map((session) => {
       const now = new Date();
@@ -401,28 +413,16 @@ export const getInstructorSessionsWithBookings = asyncHandler(
         computedStatus = "completed";
       }
 
-      // Calculate available seats
-      let bookedSeats = 0;
-      if (session.booking && session.booking.length > 0) {
-        session.booking.forEach(b => {
-          bookedSeats += 1; // Main booker
-          if (b.groupMember && b.groupMember.length > 0) {
-            bookedSeats += b.groupMember.length;
-          }
-        });
-      }
-
-      const availableSeats = Math.max(0, session.capacity - bookedSeats);
+      const availability = getSessionAvailabilityFields(session, seatCounts);
 
       return {
         ...session.toObject(),
         computedStatus,
-        bookedSeats,
-        availableSeats,
+        ...availability,
         isBookable:
           computedStatus === "upcoming" &&
-          availableSeats > 0 &&
-          session.status === "active",
+          session.status === "active" &&
+          availability.availableSeats > 0,
       };
     });
 

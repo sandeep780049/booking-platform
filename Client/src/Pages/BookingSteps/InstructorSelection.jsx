@@ -66,7 +66,9 @@ export const InstructorSelection = ({
                 initial="hidden"
                 animate="visible"
             >
-                {mockInstructors.map((instructor) => (
+                {mockInstructors.map((instructor) => {
+                    const seatsLeft = instructor.availableSeats ?? instructor.capacity
+                    return (
                     <motion.div key={instructor._id} variants={itemVariants}>
                         <Card
                             className={cn(
@@ -103,6 +105,13 @@ export const InstructorSelection = ({
                                         )}
                                         <span className="text-sm ml-1.5 font-medium text-gray-900">{instructor.instructorId?.instructor.avgReview}</span>
                                     </div>
+                                    {instructor.availableSeats !== undefined && (
+                                        <div className={`flex justify-center mb-3 ${seatsLeft > 0 ? "text-green-600" : "text-red-600"}`}>
+                                            <span className="text-sm font-medium">
+                                                {seatsLeft > 0 ? `${seatsLeft} seat${seatsLeft > 1 ? "s" : ""} left` : "Sold out"}
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200">
                                         <div>
                                             <span className="font-bold text-gray-900 text-xl">
@@ -122,8 +131,10 @@ export const InstructorSelection = ({
                                             </Button>
                                             <Button
                                                 size="sm"
+                                                disabled={seatsLeft <= 0}
                                                 className={cn(
                                                     "flex items-center gap-1.5 transition-all duration-200 font-medium",
+                                                    seatsLeft <= 0 && "opacity-60 cursor-not-allowed",
                                                     selectedInstructor && selectedInstructor._id === instructor._id
                                                         ? "bg-gray-900 text-white hover:bg-gray-800"
                                                         : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-900 hover:text-white hover:border-gray-900",
@@ -142,7 +153,7 @@ export const InstructorSelection = ({
                                                 ) : (
                                                     <>
                                                         <Plus size={14} />
-                                                        {t("select")}
+                                                        {seatsLeft <= 0 ? "Full" : t("select")}
                                                     </>
                                                 )}
                                             </Button>
@@ -152,7 +163,8 @@ export const InstructorSelection = ({
                             </div>
                         </Card>
                     </motion.div>
-                ))}
+                    )
+                })}
             </motion.div>
 
             {/* Instructor Dialog */}

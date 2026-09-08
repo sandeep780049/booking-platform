@@ -147,7 +147,7 @@ export const BookingSummary = ({
 
         } catch (error) {
             console.error("Error during booking:", error);
-            toast.error("Failed to create booking.", { id: bookingId });
+            toast.error(error?.response?.data?.message || "Failed to create booking.", { id: bookingId });
         } finally {
             setIsBooking(false);
         }

@@ -11,6 +11,10 @@ import { createRevolutOrder } from "../utils/revolut.js";
 import { Hotel } from "../models/hotel.model.js";
 import mongoose from "mongoose";
 import PayPalService from "../services/paypal.service.js";
+import {
+  getSessionAvailability,
+  getSessionAvailabilityFields,
+} from "../utils/sessionAvailability.js";
 
 // Helper function to calculate days between dates
 const calculateDaysBetween = (startDate, endDate) => {
@@ -229,13 +233,18 @@ export const createSessionBooking = asyncHandler(async (req, res) => {
       throw new ApiError(404, "User not found");
     }
 
-    // Check session capacity
+    // Check session capacity against all active bookings (prevents overbooking)
+    const seatCounts = await getSessionAvailability([sessionData], session_db);
+    const bookedSeats = seatCounts.get(sessionData._id.toString()) || 0;
     const totalParticipants = groupMembers.length + 1;
 
-    const remainingCapacity = sessionData.capacity - totalParticipants;
-
-    if (remainingCapacity < 0) {
-      throw new ApiError(400, `Insufficient session capacity. Available slots: ${remainingCapacity}, Requested: ${totalParticipants}`);
+    // Reject if adding this booking would exceed the session's total capacity
+    if (bookedSeats + totalParticipants > sessionData.capacity) {
+      const seatsLeft = Math.max(0, sessionData.capacity - bookedSeats);
+      throw new ApiError(
+        409,
+        `Insufficient session capacity. Only ${seatsLeft} seat(s) left for this session, but ${totalParticipants} requested.`
+      );
     }
 
     // Calculate session price
@@ -300,7 +309,7 @@ export const createSessionBooking = asyncHandler(async (req, res) => {
       user: userId,
       session: session,
       groupMember: groupMembers,
-      totalPrice: totalPrice,
+      amount: totalPrice,
       modeOfPayment,
       status: "pending",
       transactionId: paymentData.id,
@@ -346,6 +355,8 @@ export const createSessionBooking = asyncHandler(async (req, res) => {
           itemBooking,
           hotelBooking,
           totalPrice,
+          ...getSessionAvailabilityFields(sessionData, seatCounts),
+          availableSeats: Math.max(0, sessionData.capacity - bookedSeats - totalParticipants),
           paymentUrl: (modeOfPayment === "revolut") ? paymentData.checkout_url : paymentData.links[1].href,
         },
         "Session booking created successfully"
