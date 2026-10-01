@@ -17,7 +17,7 @@ async function recalcForItem(itemId) {
 
   if (res.length) {
     await Item.findByIdAndUpdate(itemId, {
-      avgRating: res[0].avg,
+      avgRating: roundRating(res[0].avg),
       totalReviews: res[0].count,
     });
   } else {
@@ -30,6 +30,11 @@ async function recalcForItem(itemId) {
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import mongoose from "mongoose";
+
+// Averages are stored rounded to one decimal so the denormalised values on
+// Item/Instructor/Hotel stay readable instead of persisting full float tails
+// such as 4.333333333333333.
+const roundRating = (value) => Math.round((Number(value) || 0) * 10) / 10;
 
 async function recalcForInstructor(instructorId) {
   const res = await Review.aggregate([
@@ -45,7 +50,7 @@ async function recalcForInstructor(instructorId) {
 
   if (res.length) {
     await Instructor.findByIdAndUpdate(instructorId, {
-      avgReview: res[0].avg,
+      avgReview: roundRating(res[0].avg),
       reviewCount: res[0].count,
     });
   } else {
@@ -70,7 +75,7 @@ async function recalcForHotel(hotelId) {
 
   if (res.length) {
     await Hotel.findByIdAndUpdate(hotelId, {
-      avgReview: res[0].avg,
+      avgReview: roundRating(res[0].avg),
       reviewCount: res[0].count,
     });
   } else {
