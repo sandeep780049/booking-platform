@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { Navbar } from '../../components/Navbar'
 import StarRating from '../../components/StarRating'
+import ReviewList from '../../components/reviews/ReviewList'
 import DateRangePicker from '../../components/ui/DateRangePicker'
 import { ArrowLeft, ShoppingCart, Package, CreditCard, Banknote, Plus, Minus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -403,6 +404,8 @@ export const ItemPage = () => {
                         </Card>
                     </div>
                 </div>
+
+                <ReviewList itemId={item._id} />
             </div>
         </div>
     )
