@@ -7,8 +7,14 @@ export const postReview = async (data) => {
 };
 
 export const fetchReviews = async (params) => {
-  // params: { instructorId?, hotelId?, page, limit }
+  // params: { instructorId?, hotelId?, itemId?, rating?, sort?, page, limit }
   const res = await axiosClient.get('/api/reviews', { params, withCredentials: true });
+  return res.data;
+};
+
+// Average rating plus a 5->1 star distribution for a target.
+export const fetchReviewSummary = async (params) => {
+  const res = await axiosClient.get('/api/reviews/summary', { params, withCredentials: true });
   return res.data;
 };
 
