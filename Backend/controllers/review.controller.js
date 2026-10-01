@@ -181,27 +181,114 @@ export const deleteReview = asyncHandler(async (req, res) => {
   res.json({ success: true });
 });
 
-export const getReviews = asyncHandler(async (req, res) => {
-  const { instructorId, hotelId, itemId, page = 1, limit = 20 } = req.query;
+// Sort orders accepted by getReviews via ?sort=
+const REVIEW_SORTS = {
+  newest: { createdAt: -1 },
+  oldest: { createdAt: 1 },
+  highest: { rating: -1, createdAt: -1 },
+  lowest: { rating: 1, createdAt: -1 },
+};
+
+// Resolve the public target params into a Review filter.
+//
+// instructorId is accepted as a User id because that is what the booking UI
+// has to hand (Session.instructorId points at User), while Review.instructor
+// points at the separate Instructor profile document. Returns null when an
+// instructorId does not resolve to a profile, which callers surface as empty.
+const resolveTargetFilter = async ({ instructorId, hotelId, itemId }) => {
   const filter = {};
+
   if (instructorId) {
-    const user = await User.findById(instructorId);
-    if (!user || !user.instructor) {
-      return res.json([]);
-    }
+    const user = await User.findById(instructorId).select("instructor");
+    if (!user || !user.instructor) return null;
     filter.instructor = user.instructor._id ? user.instructor._id : user.instructor;
   }
   if (hotelId) filter.hotel = hotelId;
   if (itemId) filter.item = itemId;
 
-  const skip = (Number(page) - 1) * Number(limit);
+  return filter;
+};
+
+export const getReviews = asyncHandler(async (req, res) => {
+  const { instructorId, hotelId, itemId, rating, sort = "newest", page = 1, limit = 20 } = req.query;
+
+  const filter = await resolveTargetFilter({ instructorId, hotelId, itemId });
+  if (!filter) return res.json([]);
+
+  if (rating) {
+    const value = Number(rating);
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      throw new ApiError(400, "Rating must be between 1 and 5");
+    }
+    filter.rating = value;
+  }
+
+  const currentPage = Math.max(Number(page) || 1, 1);
+  // Clamp so a caller cannot ask for an unbounded slice.
+  const perPage = Math.min(Math.max(Number(limit) || 20, 1), 50);
+
   const reviews = await Review.find(filter)
     .populate("user", "name email")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(Number(limit));
+    .sort(REVIEW_SORTS[sort] || REVIEW_SORTS.newest)
+    .skip((currentPage - 1) * perPage)
+    .limit(perPage);
 
   res.json(reviews);
+});
+
+// Average rating plus a 5->1 star distribution for a target, used to render
+// the review breakdown widget. Computed in one constant-memory aggregation.
+export const getReviewSummary = asyncHandler(async (req, res) => {
+  const emptyBreakdown = () =>
+    [5, 4, 3, 2, 1].map((value) => ({ rating: value, count: 0, percentage: 0 }));
+
+  const { instructorId, hotelId, itemId } = req.query;
+
+  const filter = await resolveTargetFilter({ instructorId, hotelId, itemId });
+  if (!filter) {
+    return res.json({ avgRating: 0, totalReviews: 0, breakdown: emptyBreakdown() });
+  }
+
+  const [stats] = await Review.aggregate([
+    { $match: filter },
+    {
+      $group: {
+        _id: null,
+        avgRating: { $avg: "$rating" },
+        totalReviews: { $sum: 1 },
+        five: { $sum: { $cond: [{ $eq: ["$rating", 5] }, 1, 0] } },
+        four: { $sum: { $cond: [{ $eq: ["$rating", 4] }, 1, 0] } },
+        three: { $sum: { $cond: [{ $eq: ["$rating", 3] }, 1, 0] } },
+        two: { $sum: { $cond: [{ $eq: ["$rating", 2] }, 1, 0] } },
+        one: { $sum: { $cond: [{ $eq: ["$rating", 1] }, 1, 0] } },
+      },
+    },
+  ]);
+
+  if (!stats) {
+    return res.json({ avgRating: 0, totalReviews: 0, breakdown: emptyBreakdown() });
+  }
+
+  const counts = {
+    5: stats.five,
+    4: stats.four,
+    3: stats.three,
+    2: stats.two,
+    1: stats.one,
+  };
+
+  res.json({
+    avgRating: roundRating(stats.avgRating),
+    totalReviews: stats.totalReviews,
+    breakdown: [5, 4, 3, 2, 1].map((value) => ({
+      rating: value,
+      count: counts[value],
+      percentage:
+        stats.totalReviews === 0
+          ? 0
+          : Math.round((counts[value] / stats.totalReviews) * 100),
+    })),
+  });
 });
 
 export const getReview = asyncHandler(async (req, res) => {

@@ -5,6 +5,7 @@ import {
   deleteReview,
   getReviews,
   getReview,
+  getReviewSummary,
 } from "../controllers/review.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -12,6 +13,8 @@ const router = express.Router();
 
 // Public listing
 router.get("/", getReviews);
+// Must be registered before "/:id", otherwise "summary" is matched as an id.
+router.get("/summary", getReviewSummary);
 router.get("/:id", getReview);
 
 // Auth required for write ops
