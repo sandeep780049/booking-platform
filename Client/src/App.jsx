@@ -23,6 +23,7 @@ import { RBACProvider } from "./contexts/RBACContext"
 import { CartProvider } from "./Pages/Cart/CartContext"
 import { ComparisonProvider } from "./contexts/ComparisonContext"
 import { FavoritesProvider } from "./contexts/FavoritesContext"
+import { ThemeProvider } from "./contexts/ThemeContext"
 import { WebsiteSettingsProvider } from "./contexts/WebsiteSettingsContext"
 import { ConnectionSpeedIndicator } from "./components/ConnectionSpeedIndicator"
 
@@ -165,7 +166,8 @@ const ConditionalChatWidget = () => {
 const App = () => {
   return (
     <I18nextProvider i18n={i18n}>
-      <AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
         <RBACProvider>
           <WebsiteSettingsProvider>
             <CartProvider>
@@ -396,6 +398,7 @@ const App = () => {
           </WebsiteSettingsProvider>
         </RBACProvider>
       </AuthProvider>
+      </ThemeProvider>
     </I18nextProvider>
   )
 }

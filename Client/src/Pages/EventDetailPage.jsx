@@ -8,6 +8,7 @@ import { Badge } from "../components/ui/badge";
 import { toast } from "sonner";
 import { getEventById } from "../Api/event.api";
 import { createEventBooking } from "../Api/eventBooking.api";
+import { validateCoupon } from "../Api/coupon.api";
 import { useAuth } from "./AuthProvider";
 
 function LightboxViewer({ images, initialIndex, onClose }) {
@@ -272,11 +273,39 @@ export default function EventDetailPage() {
         let amount = price * participants;
         if (isNaN(amount) || amount < 0) amount = 0;
 
+        // Optional coupon code (paid events only) — validates against the backend
+        let couponCode = null;
+        let couponDiscount = 0;
+        let finalAmount = amount;
+        if (amount > 0) {
+            const couponInput = prompt("Coupon code (leave blank to skip):", "");
+            const trimmedCoupon = (couponInput || "").trim();
+            if (trimmedCoupon) {
+                try {
+                    const couponResult = await validateCoupon({
+                        code: trimmedCoupon,
+                        amount,
+                    });
+                    couponCode = couponResult?.data?.code || trimmedCoupon.toUpperCase();
+                    couponDiscount = Number(couponResult?.data?.discount) || 0;
+                    finalAmount = Number(couponResult?.data?.finalAmount);
+                    if (isNaN(finalAmount) || finalAmount < 0) finalAmount = amount;
+                    toast.success(`Coupon applied: -${couponDiscount}`);
+                } catch (couponError) {
+                    const couponMessage =
+                        couponError?.response?.data?.message ||
+                        "Invalid coupon code. Booking will use the full price.";
+                    toast.error(couponMessage);
+                    return;
+                }
+            }
+        }
+
         // Prepare booking data (ensure all required fields are present and valid)
         // Try to send all possible event IDs for backend compatibility
         const eventId = event._id || event.id || event.eventId || id;
         const safeParticipants = Number(participants) > 0 ? Number(participants) : 1;
-        const safeAmount = Number(amount) >= 0 ? Number(amount) : 0;
+        const safeAmount = Number(finalAmount) >= 0 ? Number(finalAmount) : 0;
         const safeEmail = String(email).trim();
         const safePhone = String(phone).trim();
         const bookingData = {
@@ -285,6 +314,7 @@ export default function EventDetailPage() {
             contactInfo: { email: safeEmail, phone: safePhone },
             amount: safeAmount,
             paymentMethod: paymentMethod, // Use selected payment method
+            couponCode,
         };
 
         // Debug: log bookingData before sending

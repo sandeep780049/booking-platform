@@ -55,6 +55,23 @@ const eventBookingSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    couponCode: {
+      type: String,
+      required: false,
+      uppercase: true,
+      trim: true,
+    },
+    couponDiscount: {
+      type: Number,
+      required: false,
+      min: 0,
+      default: 0,
+    },
+    couponUsedAt: {
+      type: Date,
+      required: false,
+      default: null,
+    },
     transactionId: {
       type: String,
       required: false,

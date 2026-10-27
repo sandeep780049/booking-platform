@@ -34,6 +34,7 @@ import sponsorRouter from "./routes/sponsor.routes.js";
 import achievementRuleRouter from "./routes/achievementRule.routes.js";
 import reviewRouter from "./routes/review.routes.js";
 import registrationLimitRouter from "./routes/registrationLimit.routes.js";
+import couponRouter from "./routes/coupon.routes.js";
 import { initCloudinary } from "./utils/cloudinary.js";
 import { ensureDefaultTerms } from "./controllers/terms.controller.js";
 import { ensureDefaultDeclaration } from "./controllers/declaration.controller.js";
@@ -72,6 +73,7 @@ initSocketIO(io);
 // Routes
 app.use("/api/auth", authRoute);
 app.use("/api/adventure", adventureRoute);
+app.use("/api/coupons", couponRouter);
 app.use("/api/user", userRoute);
 app.use("/api/tickets", tickerRoute);
 app.use("/api/terms", termRouter);

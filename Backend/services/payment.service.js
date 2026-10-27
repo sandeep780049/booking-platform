@@ -1,6 +1,7 @@
 import { Booking } from "../models/booking.model.js";
 import { Cart } from "../models/cart.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { recordCouponUsage } from "../utils/coupon.js";
 import { updateUserAchievement } from "../utils/updateUserAchievement.js";
 import { UserAdventureExperience } from "../models/userAdventureExperience.model.js";
 import emailService from "./email.service.js";
@@ -130,6 +131,9 @@ export class PaymentService {
       }
 
       await booking.save();
+
+      // Count coupon usage once the paid booking is confirmed
+      await recordCouponUsage(booking);
 
       // Send email confirmation
       try {
@@ -291,6 +295,9 @@ export class PaymentService {
       booking.status = "confirmed";
       booking.paymentCompletedAt = new Date();
       await booking.save();
+
+      // Count coupon usage once the paid booking is confirmed
+      await recordCouponUsage(booking);
 
       // Send email confirmation for PayPal payments
       try {

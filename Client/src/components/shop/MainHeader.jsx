@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Search, ShoppingCart, Heart, User, Menu, X, GitCompare, Mountain, Tent, Waves, Wind, ShieldCheck } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
+import { Search, ShoppingCart, Heart, User, Menu, X, GitCompare, Mountain, Tent, Waves, Wind, ShieldCheck, Sun, Moon } from "lucide-react";
 
 export default function MainHeader({ categories = [], onSearch, onCategorySelect, selectedCategory }) {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -79,7 +81,7 @@ export default function MainHeader({ categories = [], onSearch, onCategorySelect
             </button>
 
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 mt-2 w-96 bg-white text-black rounded-md shadow-lg overflow-hidden z-40">
+              <div className="absolute left-0 mt-2 w-96 bg-white dark:bg-neutral-900 text-black dark:text-white rounded-md shadow-lg overflow-hidden z-40">
                 {suggestions.map((s, idx) => (
                   <button key={s._id || idx} type="button" onClick={() => { setQuery(s.name || ''); setShowSuggestions(false); if (onSearch) onSearch(s.name || ''); else navigate(`/shop/nav?search=${encodeURIComponent(s.name || '')}`); }} className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm flex items-center gap-3">
                     <div className="w-10 h-10 bg-neutral-100 rounded overflow-hidden flex items-center justify-center">
@@ -98,6 +100,15 @@ export default function MainHeader({ categories = [], onSearch, onCategorySelect
               </div>
             )}
           </form>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className="hover:text-orange-400"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
           <Link to="/favorites" className="hover:text-orange-400"><Heart className="h-5 w-5" /></Link>
           <Link to="/shop/comparison" className="hover:text-orange-400"><GitCompare className="h-5 w-5" /></Link>
           <Link to="/cart" className="relative hover:text-orange-400">
@@ -119,6 +130,9 @@ export default function MainHeader({ categories = [], onSearch, onCategorySelect
           </form>
           {/* Mobile Nav Categories Removed */}
           <div className="flex gap-6 pt-2 text-sm">
+            <button type="button" onClick={toggleTheme} className="hover:text-orange-400 flex items-center gap-1">
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} {theme === "dark" ? "Light" : "Dark"}
+            </button>
             <Link to="/favorites" onClick={() => setMobileOpen(false)} className="hover:text-orange-400 flex items-center gap-1"><Heart className="h-4 w-4" /> Favorites</Link>
             <Link to="/shop/comparison" onClick={() => setMobileOpen(false)} className="hover:text-orange-400 flex items-center gap-1"><GitCompare className="h-4 w-4" /> Compare</Link>
             <Link to="/account" onClick={() => setMobileOpen(false)} className="hover:text-orange-400 flex items-center gap-1"><User className="h-4 w-4" /> Account</Link>

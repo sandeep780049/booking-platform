@@ -8,6 +8,7 @@ import { PaymentService } from "../services/payment.service.js";
 import PayPalService from "../services/paypal.service.js";
 import axios from "axios";
 import { createRevolutOrder } from "../utils/revolut.js";
+import { computeCouponDiscount } from "../utils/coupon.js";
 
 export const createEventBooking = asyncHandler(async (req, res) => {
   const {
@@ -17,6 +18,7 @@ export const createEventBooking = asyncHandler(async (req, res) => {
     amount,
     paymentMethod,
     adventureInstructors,
+    couponCode,
   } = req.body;
 
 
@@ -84,6 +86,17 @@ export const createEventBooking = asyncHandler(async (req, res) => {
     finalAmount = Number(eventExists.price) || 0;
   }
 
+  // Apply coupon discount when a code is supplied; the discounted amount is what
+  // gets charged and stored on the booking.
+  let coupon = null;
+  let couponDiscount = 0;
+  if (couponCode) {
+    const applied = await computeCouponDiscount(couponCode, finalAmount);
+    coupon = applied.coupon;
+    couponDiscount = applied.discount;
+    finalAmount = applied.finalAmount;
+  }
+
   // If amount is zero (free event), create confirmed booking without payment order
   if (finalAmount <= 0) {
     const booking = await EventBooking.create({
@@ -96,6 +109,8 @@ export const createEventBooking = asyncHandler(async (req, res) => {
       paymentOrderId: null,
       paymentStatus: "completed",
       status: "confirmed",
+      couponCode: coupon ? coupon.code : undefined,
+      couponDiscount: 0,
       adventureInstructors: adventureInstructors || [],
       adventureCompletionStatus: eventExists.adventures.map((adventure) => ({
         adventure: adventure._id,
@@ -161,6 +176,8 @@ export const createEventBooking = asyncHandler(async (req, res) => {
     participants,
     contactInfo,
     amount: finalAmount,
+    couponCode: coupon ? coupon.code : undefined,
+    couponDiscount,
     paymentMethod: finalPaymentMethod,
     paymentOrderId: finalPaymentMethod === "paypal" ? paymentOrder.id : paymentOrder.id,
     paymentStatus: "pending",
